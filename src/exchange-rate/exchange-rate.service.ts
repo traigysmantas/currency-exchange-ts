@@ -2,21 +2,23 @@ import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { AxiosError } from 'axios';
 import { catchError, firstValueFrom } from 'rxjs';
-import { GetExchangeRateResponse } from './dto/get-exchange-rate-response.dto';
-import { SupportedCurrency } from '../quote/enums/supported-currency.enum';
+import { FetchExchangeRateResponse } from './dto/fetch-exchange-rate-response.dto';
+import { SupportedCurrency } from '../quote/enums/supported-currencies.enum';
+import { LruCache } from '../cache/lru-cache';
+import { ExchangeRates } from './types/exchange-rates.type';
 
 @Injectable()
 export class ExchangeRateService {
-  constructor(private readonly httpService: HttpService) {}
+  constructor(
+    private readonly httpService: HttpService,
+    private readonly cacheService: LruCache<ExchangeRates>,
+  ) {}
 
-  private async fetchExchangeRates({
-    baseCurrency,
-  }: {
-    baseCurrency: SupportedCurrency;
-  }): Promise<GetExchangeRateResponse> {
+  private async fetchExchangeRates({ baseCurrency }: { baseCurrency: SupportedCurrency }): Promise<ExchangeRates> {
+    // TODO: check how change catchErrors;
     const { data } = await firstValueFrom(
       this.httpService
-        .get<GetExchangeRateResponse>(`https://api.exchangerate-api.com/v4/latest/${baseCurrency}`, {
+        .get<FetchExchangeRateResponse>(`https://api.exchangerate-api.com/v4/latest/${baseCurrency}`, {
           params: {
             base: baseCurrency,
           },
@@ -28,27 +30,35 @@ export class ExchangeRateService {
         ),
     );
 
-    return {
-      ...data,
-      rates: this.mapSupportedCurrency(data.rates),
-    };
+    return this.mapSupportedCurrency(data.rates);
   }
 
-  private mapSupportedCurrency(rates: GetExchangeRateResponse['rates']): GetExchangeRateResponse['rates'] {
+  private mapSupportedCurrency(rates: FetchExchangeRateResponse['rates']): ExchangeRates {
     return Object.values(SupportedCurrency).reduce((supportedCurrencyRates, currency) => {
-      return { ...supportedCurrencyRates, [currency]: rates[currency] };
-    }, {});
+      const exchangeRate = rates[currency];
+
+      if (!exchangeRate) throw new Error(`Unsupported exchange rate for currency: ${currency}`);
+
+      return { ...supportedCurrencyRates, [currency]: exchangeRate };
+    }, {} as ExchangeRates);
   }
 
-  async getExchangeRates({
+  async get({
     baseCurrency,
     quoteCurrency,
   }: {
     baseCurrency: SupportedCurrency;
     quoteCurrency: SupportedCurrency;
-  }): Promise<GetExchangeRateResponse> {
-    const exchangeRates = await this.fetchExchangeRates({ baseCurrency });
+  }): Promise<number> {
+    const cachedExchangeRates = this.cacheService.get(baseCurrency);
 
-    return exchangeRates;
+    if (cachedExchangeRates) {
+      return cachedExchangeRates[quoteCurrency];
+    }
+
+    const exchangeRates = await this.fetchExchangeRates({ baseCurrency });
+    this.cacheService.set(baseCurrency, exchangeRates);
+
+    return exchangeRates[quoteCurrency];
   }
 }

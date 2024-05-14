@@ -1,6 +1,6 @@
-import { SupportedCurrency } from '../../quote/enums/supported-currency.enum';
+import { SupportedCurrency } from '../../quote/enums/supported-currencies.enum';
 
-export class GetExchangeRateResponse {
+export class FetchExchangeRateResponse {
   base: SupportedCurrency;
 
   /** ISO format date: YYYY-MM-DD */

@@ -8,10 +8,8 @@ export class QuoteController {
   constructor(private quoteService: QuoteService) {}
 
   @Get()
-  getQuote(
-    @Query() { baseAmount, baseCurrency, quoteCurrency }: GetQuoteRequestParams,
-  ): Promise<GetQuoteResponse> {
-    return this.quoteService.calculateQuote({
+  getQuote(@Query() { baseAmount, baseCurrency, quoteCurrency }: GetQuoteRequestParams): Promise<GetQuoteResponse> {
+    return this.quoteService.calculate({
       baseAmount,
       baseCurrency,
       quoteCurrency,
