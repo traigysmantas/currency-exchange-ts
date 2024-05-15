@@ -5,10 +5,8 @@ export class LruCache<T> {
   private cache: Map<string, T>;
   private maxSize: number;
 
-  constructor() {
-    // TODO: change this in constructor or via env vars.
-    // Cannot be equal or larger than supported Currencies.
-    this.maxSize = 3;
+  constructor(maxSize: number) {
+    this.maxSize = maxSize;
     this.cache = new Map<string, T>();
   }
 

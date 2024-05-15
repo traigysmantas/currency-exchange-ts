@@ -1,5 +1,5 @@
 import { IsEnum, IsInt } from 'class-validator';
-import { SupportedCurrency } from '../enums/supported-currencies.enum';
+import { SupportedCurrency } from '../../commons/enums/supported-currencies.enum';
 import { Type } from 'class-transformer';
 
 export class GetQuoteRequestParams {

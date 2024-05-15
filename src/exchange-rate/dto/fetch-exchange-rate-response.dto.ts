@@ -1,4 +1,4 @@
-import { SupportedCurrency } from '../../quote/enums/supported-currencies.enum';
+import { SupportedCurrency } from '../../commons/enums/supported-currencies.enum';
 
 export class FetchExchangeRateResponse {
   base: SupportedCurrency;

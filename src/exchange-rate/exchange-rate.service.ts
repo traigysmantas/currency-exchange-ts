@@ -1,9 +1,7 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
-import { AxiosError } from 'axios';
-import { catchError, firstValueFrom } from 'rxjs';
 import { FetchExchangeRateResponse } from './dto/fetch-exchange-rate-response.dto';
-import { SupportedCurrency } from '../quote/enums/supported-currencies.enum';
+import { SupportedCurrency } from '../commons/enums/supported-currencies.enum';
 import { LruCache } from '../cache/lru-cache';
 import { ExchangeRates } from './types/exchange-rates.type';
 
@@ -15,22 +13,20 @@ export class ExchangeRateService {
   ) {}
 
   private async fetchExchangeRates({ baseCurrency }: { baseCurrency: SupportedCurrency }): Promise<ExchangeRates> {
-    // TODO: check how change catchErrors;
-    const { data } = await firstValueFrom(
-      this.httpService
-        .get<FetchExchangeRateResponse>(`https://api.exchangerate-api.com/v4/latest/${baseCurrency}`, {
+    try {
+      const { data: ratesResponse } = await this.httpService.axiosRef.get<FetchExchangeRateResponse>(
+        `https://api.exchangerate-api.com/v4/latest/${baseCurrency}`,
+        {
           params: {
             base: baseCurrency,
           },
-        })
-        .pipe(
-          catchError((err: AxiosError) => {
-            throw err;
-          }),
-        ),
-    );
+        },
+      );
 
-    return this.mapSupportedCurrency(data.rates);
+      return this.mapSupportedCurrency(ratesResponse.rates);
+    } catch (err) {
+      throw new Error('Failed to fetch exchange rates');
+    }
   }
 
   private mapSupportedCurrency(rates: FetchExchangeRateResponse['rates']): ExchangeRates {
