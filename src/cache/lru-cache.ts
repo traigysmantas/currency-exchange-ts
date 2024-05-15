@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
+import { MemoryCache } from './cache.interface';
 
 @Injectable()
-export class LruCache<T> {
+export class LruCache<T> implements MemoryCache<T> {
   private cache: Map<string, T>;
   private maxSize: number;
 
@@ -10,7 +11,7 @@ export class LruCache<T> {
     this.cache = new Map<string, T>();
   }
 
-  get(key: string): T {
+  get(key: string): T | null {
     const item = this.cache.get(key);
 
     if (item) {
@@ -20,15 +21,25 @@ export class LruCache<T> {
 
       return item;
     }
+
+    return null;
   }
 
   set(key: string, value: T): void {
     if (this.cache.size >= this.maxSize) {
-      // Remove oldestKey (first) key of cache map.
+      // Remove oldest key (first) key from cache map.
       const oldestKey = this.cache.keys().next().value;
       this.cache.delete(oldestKey);
     }
 
     this.cache.set(key, value);
+  }
+
+  keys() {
+    return this.cache.keys();
+  }
+
+  clear() {
+    return this.cache.clear();
   }
 }

@@ -1,7 +1,7 @@
 import { SupportedCurrency } from '../../commons/enums/supported-currencies.enum';
 
 export class FetchExchangeRateResponse {
-  base: SupportedCurrency;
+  base: string | SupportedCurrency;
 
   /** ISO format date: YYYY-MM-DD */
   date: string;
