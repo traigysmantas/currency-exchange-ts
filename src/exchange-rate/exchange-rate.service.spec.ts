@@ -1,14 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ExchangeRateService } from './exchange-rate.service';
 import { SupportedCurrency } from '../commons/enums/supported-currencies.enum';
-import { LruCache } from '../cache/lru-cache';
 import { ExchangeRates } from './types/exchange-rates.type';
 import { HttpService } from '@nestjs/axios';
 import { AxiosError } from 'axios';
+import { MEMORY_CACHE, MemoryCache } from '../cache/cache.interface';
 
 describe(`${ExchangeRateService.name}`, () => {
   let exchangeRateService: ExchangeRateService;
-  let cacheService: LruCache<ExchangeRates>;
+  let cacheService: MemoryCache<ExchangeRates>;
   let httpService: HttpService;
 
   const exchangeRates: ExchangeRates = {
@@ -31,7 +31,7 @@ describe(`${ExchangeRateService.name}`, () => {
           },
         },
         {
-          provide: LruCache,
+          provide: MEMORY_CACHE,
           useValue: {
             get: jest.fn(),
             set: jest.fn(),
@@ -41,7 +41,7 @@ describe(`${ExchangeRateService.name}`, () => {
     }).compile();
 
     exchangeRateService = module.get(ExchangeRateService);
-    cacheService = module.get(LruCache);
+    cacheService = module.get(MEMORY_CACHE);
     httpService = module.get(HttpService);
   });
 

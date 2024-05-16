@@ -1,16 +1,16 @@
 import { HttpService } from '@nestjs/axios';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { FetchExchangeRateResponse } from './dto/fetch-exchange-rate-response.dto';
 import { SupportedCurrency } from '../commons/enums/supported-currencies.enum';
-import { LruCache } from '../cache/lru-cache';
 import { ExchangeRates } from './types/exchange-rates.type';
 import { AxiosError } from 'axios';
+import { MEMORY_CACHE, MemoryCache } from '../cache/cache.interface';
 
 @Injectable()
 export class ExchangeRateService {
   constructor(
     private readonly httpService: HttpService,
-    private readonly cacheService: LruCache<ExchangeRates>,
+    @Inject(MEMORY_CACHE) private readonly cacheService: MemoryCache<ExchangeRates>,
   ) {}
 
   async fetchExchangeRates(baseCurrency: SupportedCurrency): Promise<ExchangeRates> {

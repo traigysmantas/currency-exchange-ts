@@ -7,12 +7,8 @@ import { SupportedCurrency } from '../commons/enums/supported-currencies.enum';
 @Module({
   imports: [
     HttpModule,
-    /**
-     *  If LRU cache size is bigger than number of SupportedCurrency keys,
-     *  after 24 hours cache turns stale and all cached exchanged rates will be invalid.
-     * Even
-     */
-    CacheModule.setmaxLRUSize(Object.keys(SupportedCurrency).length - 1),
+    // CacheModule.registerLruCache(Object.keys(SupportedCurrency).length - 1),
+    CacheModule.registerLruTttlCache({ maxSize: Object.keys(SupportedCurrency).length - 1, ttlInSeconds: 60 }),
   ],
   providers: [ExchangeRateService],
   exports: [ExchangeRateService],

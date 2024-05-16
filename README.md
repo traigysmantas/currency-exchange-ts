@@ -1,36 +1,37 @@
-## Description
+# Description
 
-Currency exchange rate service which uses implemented LRU Cache algorithm.
+Currency exchange service developed in Nestjs, which provides few exchange rate caching algorithms:
 
-Application is implemented using NestJs framework.
+- LRU only cache
+- LRU + TTL cache
 
-## Issues with algorithm and currency exchanges.
+Algorithms are defined in [CacheModule](src/cache/cache.module.ts)
+
+Algorithms can be changed in [ExchangeRateModule](src/exchange-rate/exchange-rate.module.ts)
+
+## Issues with LRU only algorithm and currency exchanges.
 
 Due to the fact that currency exchange rates fluctuate constantly (in 3rd Party exchange provider it changes once a day), it is sub-optimal to use LRU algorithm alone.
 
 It raises following issues:
 
-- Cache staleness for actively used currencies. They
-- Cache size MUST be lower than number of (supported) currencies. In other case, it will create stale cache for **all** currencies which won't be updated until server is restarted/redeployed.
+- Cache staleness for actively used currencies.
+- Cache size **MUST** be lower than number of supported currencies (keys used in cache). In other case, it will create stale cache for **all** currencies which won't be updated until server is restarted/redeployed.
 
 ### Possible alternative approaches
 
 - TTL + LRU cache. Each cache record would have TTL to ensure that stale records are removed and refetched.
-- TTL cache only. There are limited amount of currencies returned from API (160 total). Each can be saved in memory with set TTL. At maximum, it might allocate up to 400 KB.
+- TTL cache only. There are limited amount of currencies returned from API (160 total), thus storing them all won't be an issue
 
-```
-(160 [number of currencies] * 160 (records of currencies in response) * 16 bytes (6 bytes for key and max 10 bytes for value)) / 1024 = 400 KB
-```
+## Setup
 
-Calculation
-
-## Installation
+### Installation
 
 ```bash
 $ npm install
 ```
 
-## Running the app
+### Running the app
 
 ```bash
 # development
@@ -40,15 +41,9 @@ $ npm run start
 $ npm run start:dev
 ```
 
-## Test
+### Test
 
 ```bash
 # unit tests
 $ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
 ```
