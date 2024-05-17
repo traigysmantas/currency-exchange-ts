@@ -49,12 +49,23 @@ describe('QuoteService', () => {
       });
     });
 
-    it('returns exchangeRate and rounded quoteAmount (in cents) to nearest integer', async () => {
+    it('returns rounded quoteAmount (in cents) to nearest integer', async () => {
       const result = await quoteService.calculate({ ...params, baseAmount: 125312 });
 
       expect(result).toStrictEqual({
         exchangeRate: 1.08,
         quoteAmount: 135337,
+      });
+    });
+
+    it('returns exchangeRate rounded to up to 3 decimals digits', async () => {
+      jest.spyOn(exchangeRateService, 'get').mockResolvedValue(1.08121312);
+
+      const result = await quoteService.calculate({ ...params, baseAmount: 134123 });
+
+      expect(result).toStrictEqual({
+        exchangeRate: 1.081,
+        quoteAmount: 144987,
       });
     });
   });

@@ -25,6 +25,11 @@ It brings up the following issues:
 
 ## Setup
 
+### Environment setup
+
+- Create new .env file
+- Copy contents of .env.example to .env file
+
 ### Installation
 
 ```bash
