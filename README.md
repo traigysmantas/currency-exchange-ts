@@ -13,7 +13,7 @@ Algorithms can be changed in [ExchangeRateModule](src/exchange-rate/exchange-rat
 
 Due to the fact that currency exchange rates fluctuate constantly (in 3rd Party exchange provider it changes once a day), it is sub-optimal to use LRU algorithm alone.
 
-It raises following issues:
+It brings up the following issues:
 
 - Cache staleness for actively used currencies.
 - Cache size **MUST** be lower than number of supported currencies (keys used in cache). In other case, it will create stale cache for **all** currencies which won't be updated until server is restarted/redeployed.

@@ -3,12 +3,19 @@ import { ExchangeRateService } from './exchange-rate.service';
 import { HttpModule } from '@nestjs/axios';
 import { CacheModule } from '../cache/cache.module';
 import { SupportedCurrency } from '../commons/enums/supported-currencies.enum';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
     HttpModule,
-    // CacheModule.registerLruCache(Object.keys(SupportedCurrency).length - 1),
-    CacheModule.registerLruTttlCache({ maxSize: Object.keys(SupportedCurrency).length - 1, ttlInSeconds: 60 }),
+    CacheModule.registerLruTttlCacheAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        maxSize: Object.keys(SupportedCurrency).length - 1,
+        ttlInSeconds: configService.get<number>('TTL_IN_SECONDS'),
+      }),
+      inject: [ConfigService],
+    }),
   ],
   providers: [ExchangeRateService],
   exports: [ExchangeRateService],
